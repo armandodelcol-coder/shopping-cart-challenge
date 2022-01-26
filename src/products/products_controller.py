@@ -1,7 +1,7 @@
 from flask import jsonify, make_response
 
-from src.products.product import Product
 from src.products.response_dto import ResponseDto
+from src.shared.models import Product
 
 
 class ProductsController:

@@ -1,13 +1,14 @@
 from flask import json
 
-from app import app, db
-from src.products.product import Product
+from app import app
+from src.shared.global_db import GlobalDB
+from src.shared.models import Product
 
 
 def test_should_return_success_with_an_existing_product_id():
     tmp_product = Product(name="PRODUTO X", stock=5)
-    db.session.add(tmp_product)
-    db.session.commit()
+    GlobalDB.instance().db.session.add(tmp_product)
+    GlobalDB.instance().db.session.commit()
     response = app.test_client().get(
         f'/products/{tmp_product.id}',
         content_type='application/json',
@@ -20,8 +21,8 @@ def test_should_return_success_with_an_existing_product_id():
     assert data['name'] == tmp_product.name
     assert data['stock'] == tmp_product.stock
 
-    db.session.delete(tmp_product)
-    db.session.commit()
+    GlobalDB.instance().db.session.delete(tmp_product)
+    GlobalDB.instance().db.session.commit()
 
 
 def test_should_return_404_with_product_not_exists():

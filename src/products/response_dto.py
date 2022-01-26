@@ -1,4 +1,4 @@
-from src.products.product import Product
+from src.shared.models import Product
 
 
 class ResponseDto:
