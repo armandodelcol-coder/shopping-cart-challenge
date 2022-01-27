@@ -108,6 +108,7 @@ class TestShoppingCartController(unittest.TestCase):
 
         data = json.loads(response.get_data(as_text=True))
 
+        assert response.status_code == 200
         assert len(data['items']) > 0
         assert data['items'][0]['product_id'] == data['items'][0]['product_id']
         assert data['items'][0]['name'] == data['items'][0]['name']
@@ -361,6 +362,7 @@ class TestShoppingCartController(unittest.TestCase):
 
         data = json.loads(response.get_data(as_text=True))
 
+        assert response.status_code == 200
         assert len(data['items']) > 0
         assert data['items'][0]['product_id'] == data['items'][0]['product_id']
         assert data['items'][0]['name'] == data['items'][0]['name']
@@ -463,5 +465,36 @@ class TestShoppingCartController(unittest.TestCase):
         # CLEAR TESTS DB
         GlobalDB.instance().db.session.query(ShoppingCart) \
             .filter(ShoppingCart.id == tmp_cart.id).delete()
+        GlobalDB.instance().db.session.commit()
+        GlobalDB.instance().db.session.close()
+
+    def test_should_clear_cart(self):
+        # PREPARE TEMP DATA
+        tmp_cart = ShoppingCart(id=uuid.uuid4())
+        GlobalDB.instance().db.session.add(tmp_cart)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        GlobalDB.instance().db.session.add(tmp_product)
+        product_in_shopping_cart = ProductsInShoppingCart()
+        product_in_shopping_cart.product_id = tmp_product.id
+        product_in_shopping_cart.quantity = 1
+        tmp_cart.products.append(product_in_shopping_cart)
+        GlobalDB.instance().db.session.commit()
+
+        response = app.test_client().post(
+            f'/shoppingcarts/{tmp_cart.id}/clear',
+            content_type='application/json',
+        )
+
+        data = json.loads(response.get_data(as_text=True))
+
+        assert response.status_code == 200
+        assert len(data['items']) == 0
+
+        # CLEAR TESTS DB
+        GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
+            .filter(ProductsInShoppingCart.shopping_cart_id == data['id']).delete()
+        GlobalDB.instance().db.session.delete(tmp_product)
+        GlobalDB.instance().db.session.query(ShoppingCart) \
+            .filter(ShoppingCart.id == data['id']).delete()
         GlobalDB.instance().db.session.commit()
         GlobalDB.instance().db.session.close()

@@ -43,7 +43,13 @@ def add_item_in_cart(cart_id):
 def remove_item_in_cart(cart_id, product_id):
     return ShoppingCartsController.remove_item(cart_id, product_id)
 
+
 @app.route('/shoppingcarts/<cart_id>', methods=['PATCH'])
 def update_item_in_cart(cart_id):
     data = request.get_json()
     return ShoppingCartsController.update_item(cart_id, data)
+
+
+@app.route('/shoppingcarts/<cart_id>/clear', methods=['POST'])
+def clear_cart(cart_id):
+    return ShoppingCartsController.clear_cart(cart_id)
