@@ -11,7 +11,7 @@ class TestShoppingCartController(unittest.TestCase):
 
     def test_should_create_shopping_cart_with_success(self):
         # PREPARE TEMP DATA
-        tmp_product = Product(name="PRODUTO X", stock=5)
+        tmp_product = Product(name="PRODUTO X", stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         GlobalDB.instance().db.session.commit()
 
@@ -41,7 +41,7 @@ class TestShoppingCartController(unittest.TestCase):
 
     def test_should_return_error_with_stock_insufficient(self):
         # PREPARE TEMP DATA
-        tmp_product = Product(name="PRODUTO X", stock=5)
+        tmp_product = Product(name="PRODUTO X", stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         GlobalDB.instance().db.session.commit()
 
@@ -96,7 +96,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart()
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(name="PRODUTO X", stock=5)
+        tmp_product = Product(name="PRODUTO X", stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         GlobalDB.instance().db.session.commit()
 
@@ -113,6 +113,7 @@ class TestShoppingCartController(unittest.TestCase):
         assert data['items'][0]['product_id'] == data['items'][0]['product_id']
         assert data['items'][0]['name'] == data['items'][0]['name']
         assert data['items'][0]['quantity'] == 1
+        assert data['items'][0]['price'] == '12.99'
 
         # CLEAR TESTS DB
         GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
@@ -139,7 +140,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart()
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(name="PRODUTO X", stock=5)
+        tmp_product = Product(name="PRODUTO X", stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         GlobalDB.instance().db.session.commit()
 
@@ -212,7 +213,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=15)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
@@ -247,7 +248,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
@@ -279,7 +280,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=14)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
@@ -321,7 +322,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=18.7)
         GlobalDB.instance().db.session.add(tmp_product)
         GlobalDB.instance().db.session.commit()
 
@@ -346,7 +347,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
@@ -393,7 +394,7 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=7)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
@@ -472,7 +473,38 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=12.99)
+        GlobalDB.instance().db.session.add(tmp_product)
+        product_in_shopping_cart = ProductsInShoppingCart()
+        product_in_shopping_cart.product_id = tmp_product.id
+        product_in_shopping_cart.quantity = 1
+        tmp_cart.products.append(product_in_shopping_cart)
+        GlobalDB.instance().db.session.commit()
+
+        response = app.test_client().post(
+            f'/shoppingcarts/{tmp_cart.id}/clear',
+            content_type='application/json',
+        )
+
+        data = json.loads(response.get_data(as_text=True))
+
+        assert response.status_code == 200
+        assert len(data['items']) == 0
+
+        # CLEAR TESTS DB
+        GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
+            .filter(ProductsInShoppingCart.shopping_cart_id == data['id']).delete()
+        GlobalDB.instance().db.session.delete(tmp_product)
+        GlobalDB.instance().db.session.query(ShoppingCart) \
+            .filter(ShoppingCart.id == data['id']).delete()
+        GlobalDB.instance().db.session.commit()
+        GlobalDB.instance().db.session.close()
+
+    def test_should_clear_cart(self):
+        # PREPARE TEMP DATA
+        tmp_cart = ShoppingCart(id=uuid.uuid4())
+        GlobalDB.instance().db.session.add(tmp_cart)
+        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=17)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id

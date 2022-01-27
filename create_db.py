@@ -12,36 +12,44 @@ engine.execute("USE shop")
 engine.execute("create table product("
                "id varchar(255) primary key, "
                "name varchar(255) not null,"
-               "stock int not null default 0) "
+               "stock int not null default 0,"
+               "price decimal(10, 2) not null) "
                "engine=InnoDB default charset=utf8mb4;")
 engine.execute("insert into product values("
                f"'{uuid.uuid4()}',"
                "'PRODUTO A',"
-               "5)")
+               "5,"
+               "10.99)")
 engine.execute("insert into product values("
                f"'{uuid.uuid4()}',"
                "'PRODUTO B',"
-               "1)")
+               "1,"
+               "5.00)")
 engine.execute("insert into product values("
                f"'{uuid.uuid4()}',"
                "'PRODUTO C',"
-               "4)")
+               "4,"
+               "3.80)")
 engine.execute("insert into product values("
                f"'{uuid.uuid4()}',"
                "'PRODUTO D',"
-               "2)")
+               "2,"
+               "7.95)")
 engine.execute("insert into product values("
                f"'{uuid.uuid4()}',"
                "'PRODUTO E',"
-               "3)")
+               "3,"
+               "20.00)")
 engine.execute("insert into product values("
                f"'{uuid.uuid4()}',"
                "'PRODUTO F',"
-               "1)")
+               "1,"
+               "12.98)")
 engine.execute("insert into product values("
                f"'{uuid.uuid4()}',"
                "'PRODUTO G',"
-               "5)")
+               "5,"
+               "17.50)")
 
 # CREATE SHOPPING_CART
 engine.execute("create table shopping_cart("

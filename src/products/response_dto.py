@@ -8,7 +8,8 @@ class ResponseDto:
         return {
             "id": product.id,
             "name": product.name,
-            "stock": product.stock
+            "stock": product.stock,
+            "price": product.price
         }
 
     @staticmethod

@@ -6,7 +6,7 @@ from src.shared.models import Product
 
 
 def test_should_return_success_with_an_existing_product_id():
-    tmp_product = Product(name="PRODUTO X", stock=5)
+    tmp_product = Product(name="PRODUTO X", stock=5, price=12.99)
     GlobalDB.instance().db.session.add(tmp_product)
     GlobalDB.instance().db.session.commit()
     response = app.test_client().get(
@@ -20,6 +20,7 @@ def test_should_return_success_with_an_existing_product_id():
     assert data['id'] == tmp_product.id
     assert data['name'] == tmp_product.name
     assert data['stock'] == tmp_product.stock
+    assert data['price'] == str(tmp_product.price)
 
     GlobalDB.instance().db.session.delete(tmp_product)
     GlobalDB.instance().db.session.commit()

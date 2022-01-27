@@ -1,5 +1,4 @@
-from src.shared.global_db import GlobalDB
-from src.shared.models import ShoppingCart, Product
+from src.shared.models import ShoppingCart
 
 
 class ResponseDto:
@@ -10,18 +9,7 @@ class ResponseDto:
 
     @staticmethod
     def show_cart_with_items(cart: ShoppingCart):
-        items = []
-        for p in cart.products:
-            product = GlobalDB.instance().db.session.query(Product) \
-                .filter(Product.id == p.product_id).first()
-            items.append(
-                {
-                    "product_id": p.product_id,
-                    "name": product.name,
-                    "quantity": p.quantity
-                }
-            )
         return {
             "id": cart.id,
-            "items": items
+            "items": cart.show_items()
         }
