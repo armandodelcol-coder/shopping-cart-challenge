@@ -18,7 +18,7 @@ class ShoppingCartsController:
         new_shopping_cart = ShoppingCart()
         try:
             for i in items:
-                product = GlobalDB.instance().db.session.query(Product)\
+                product = GlobalDB.instance().db.session.query(Product) \
                     .filter(Product.id == i['product_id']).first()
                 if product is not None:
                     if product.stock < i['quantity']:
@@ -59,7 +59,7 @@ class ShoppingCartsController:
                 'message': f'Não foi encontrado o produto com id: {product_id}'
             }), 422)
 
-        product_already_exists = GlobalDB.instance().db.session.query(ProductsInShoppingCart).\
+        product_already_exists = GlobalDB.instance().db.session.query(ProductsInShoppingCart). \
             filter(ProductsInShoppingCart.product_id == product_id,
                    ProductsInShoppingCart.shopping_cart_id == cart_id).first()
         quantity_wanted = quantity if product_already_exists is None else quantity + product_already_exists.quantity
@@ -75,5 +75,25 @@ class ShoppingCartsController:
             product_in_shopping_cart.quantity = quantity
             cart.products.append(product_in_shopping_cart)
             GlobalDB.instance().db.session.add(cart)
+        GlobalDB.instance().db.session.commit()
+        return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)
+
+    @staticmethod
+    def remove_item(cart_id, product_id):
+        cart = GlobalDB.instance().db.session.query(ShoppingCart) \
+            .filter(ShoppingCart.id == cart_id).first()
+        if cart is None:
+            return make_response(jsonify({'message': 'Carrinho não encontrado'}), 404)
+
+        product_exists = GlobalDB.instance().db.session.query(ProductsInShoppingCart). \
+            filter(ProductsInShoppingCart.product_id == product_id,
+                   ProductsInShoppingCart.shopping_cart_id == cart_id).first()
+        if product_exists is None:
+            return make_response(jsonify({
+                'message': f'Produto de id {product_id} não foi encontrado no carrinho'
+            }), 422)
+
+        GlobalDB.instance().db.session.delete(product_exists)
+        GlobalDB.instance().db.session.add(cart)
         GlobalDB.instance().db.session.commit()
         return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)

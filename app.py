@@ -37,3 +37,8 @@ def create_shopping_cart():
 def add_item_in_cart(cart_id):
     data = request.get_json()
     return ShoppingCartsController.add_item(cart_id, data)
+
+
+@app.route('/shoppingcarts/<cart_id>/<product_id>', methods=['DELETE'])
+def remove_item_in_cart(cart_id, product_id):
+    return ShoppingCartsController.remove_item(cart_id, product_id)
