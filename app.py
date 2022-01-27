@@ -14,7 +14,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
 GlobalDB.instance().db = db
 
 
@@ -32,3 +31,9 @@ def get_products():
 def create_shopping_cart():
     data = request.get_json()
     return ShoppingCartsController.create(data)
+
+
+@app.route('/shoppingcarts/<cart_id>', methods=['POST'])
+def add_item_in_cart(cart_id):
+    data = request.get_json()
+    return ShoppingCartsController.add_item(cart_id, data)

@@ -23,6 +23,7 @@ def test_should_return_success_with_an_existing_product_id():
 
     GlobalDB.instance().db.session.delete(tmp_product)
     GlobalDB.instance().db.session.commit()
+    GlobalDB.instance().db.session.close()
 
 
 def test_should_return_404_with_product_not_exists():
