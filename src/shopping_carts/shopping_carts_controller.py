@@ -97,3 +97,36 @@ class ShoppingCartsController:
         GlobalDB.instance().db.session.add(cart)
         GlobalDB.instance().db.session.commit()
         return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)
+
+    @staticmethod
+    def update_item(cart_id, data):
+        product_id = data['product_id']
+        quantity = data['quantity']
+        if quantity <= 0:
+            return make_response(jsonify({
+                'message': f'Quantidade deve ser maior que zero'
+            }), 422)
+
+        cart = GlobalDB.instance().db.session.query(ShoppingCart) \
+            .filter(ShoppingCart.id == cart_id).first()
+        if cart is None:
+            return make_response(jsonify({'message': 'Carrinho não encontrado'}), 404)
+
+        product_in_cart = GlobalDB.instance().db.session.query(ProductsInShoppingCart). \
+            filter(ProductsInShoppingCart.product_id == product_id,
+                   ProductsInShoppingCart.shopping_cart_id == cart_id).first()
+        if product_in_cart is None:
+            return make_response(jsonify({
+                'message': f'Produto de id {product_id} não foi encontrado no carrinho'
+            }), 422)
+
+        product = GlobalDB.instance().db.session.query(Product) \
+            .filter(Product.id == product_id).first()
+        if product.stock < quantity:
+            return make_response(jsonify({
+                'message': f'Estoque não é suficiente para o produto: {product.id}'
+            }), 422)
+
+        product_in_cart.quantity = quantity
+        GlobalDB.instance().db.session.commit()
+        return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)
