@@ -21,6 +21,7 @@ class Product(db.Model):
 class ShoppingCart(db.Model):
     id = db.Column(db.String, unique=True, primary_key=True, default=uuid.uuid4)
     products = db.relationship('ProductsInShoppingCart', back_populates='shopping_cart')
+    coupon_id = db.Column(db.Integer, db.ForeignKey('coupon.id'), nullable=True)
 
     def show_items(self):
         items = []
