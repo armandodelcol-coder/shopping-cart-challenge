@@ -11,7 +11,7 @@ engine.execute("USE shop")
 # CREATE PRODUCTS
 engine.execute("create table product("
                "id varchar(255) primary key, "
-               "name varchar(255) not null,"
+               "name varchar(80) not null,"
                "stock int not null default 0,"
                "price decimal(10, 2) not null) "
                "engine=InnoDB default charset=utf8mb4;")
@@ -64,3 +64,37 @@ engine.execute("create table products_in_shopping_cart("
                "constraint fk_product_shopping_cart_product foreign key (product_id) references product (id), "
                "constraint fk_product_shopping_cart_cart foreign key (shopping_cart_id) references shopping_cart (id))"
                " engine=InnoDB default charset=utf8mb4;")
+
+# CREATE COUPON
+
+engine.execute("create table coupon("
+               "id bigint primary key auto_increment, "
+               "code varchar(80) not null, "
+               "discount_percentage decimal(10, 2) not null, "
+               "is_valid tinyint(1) not null default 0)"
+               " engine=InnoDB default charset=utf8mb4;")
+
+engine.execute("insert into coupon(code, discount_percentage, is_valid) values("
+               "'VALE10',"
+               "10,"
+               "1)")
+
+engine.execute("insert into coupon(code, discount_percentage, is_valid) values("
+               "'VALE12',"
+               "12,"
+               "1)")
+
+engine.execute("insert into coupon(code, discount_percentage, is_valid) values("
+               "'VALE20',"
+               "20,"
+               "1)")
+
+engine.execute("insert into coupon(code, discount_percentage, is_valid) values("
+               "'VALE7',"
+               "7,"
+               "1)")
+
+engine.execute("insert into coupon(code, discount_percentage, is_valid) values("
+               "'VALE50',"
+               "50,"
+               "0)")

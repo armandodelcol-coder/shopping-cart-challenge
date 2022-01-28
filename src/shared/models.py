@@ -60,3 +60,10 @@ class ProductsInShoppingCart(db.Model):
 
     def __repr__(self):
         return '<ProductsInShoppingCart %r>' % self.id
+
+
+class Coupon(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(80), nullable=False)
+    discount_percentage = db.Column(db.Numeric(10, 2), nullable=False)
+    is_valid = db.Column(db.Boolean, default=False, nullable=False)

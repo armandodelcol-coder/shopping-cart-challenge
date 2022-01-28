@@ -4,6 +4,7 @@ from flask import Flask, request
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 
+from src.coupons.coupons_controller import CouponsController
 from src.products.products_controller import ProductsController
 from src.shared.global_db import GlobalDB
 from src.shopping_carts.shopping_carts_controller import ShoppingCartsController
@@ -58,3 +59,8 @@ def clear_cart(cart_id):
 @app.route('/shoppingcarts/<cart_id>', methods=['GET'])
 def show_cart(cart_id):
     return ShoppingCartsController.show_cart(cart_id)
+
+
+@app.route('/coupons', methods=['GET'])
+def get_coupons():
+    return CouponsController.get_coupons()
