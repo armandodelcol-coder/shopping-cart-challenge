@@ -14,9 +14,6 @@ class Product(db.Model):
     stock = db.Column(db.Integer, nullable=False, default=0)
     price = db.Column(db.Numeric(10, 2), nullable=False)
 
-    def __repr__(self):
-        return '<Product %r>' % self.name
-
 
 class ShoppingCart(db.Model):
     id = db.Column(db.String, unique=True, primary_key=True, default=uuid.uuid4)
@@ -41,14 +38,26 @@ class ShoppingCart(db.Model):
             )
         return items
 
-    def total(self):
+    def subtotal(self):
         total = decimal.Decimal(0)
         for i in self.show_items():
             total += i['subtotal']
         return total
 
-    def __repr__(self):
-        return '<ShoppingCart %r>' % self.id
+    def discount(self):
+        if self.coupon_id is not None:
+            coupon = GlobalDB.instance().db.session.query(Coupon).\
+                filter(Coupon.id == self.coupon_id).first()
+            return ((coupon.discount_percentage * self.subtotal()) / decimal.Decimal(100)).\
+                quantize(decimal.Decimal('0.01'))
+        return '0'
+
+    def total(self):
+        total = decimal.Decimal(0)
+        for i in self.show_items():
+            total += i['subtotal']
+        total -= decimal.Decimal(self.discount())
+        return total.quantize(decimal.Decimal('0.01'))
 
 
 class ProductsInShoppingCart(db.Model):
@@ -58,9 +67,6 @@ class ProductsInShoppingCart(db.Model):
     shopping_cart_id = db.Column('shopping_cart_id', db.String, db.ForeignKey('shopping_cart.id'))
     product = db.relationship("Product")
     shopping_cart = db.relationship("ShoppingCart", back_populates="products")
-
-    def __repr__(self):
-        return '<ProductsInShoppingCart %r>' % self.id
 
 
 class Coupon(db.Model):

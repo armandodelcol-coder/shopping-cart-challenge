@@ -150,7 +150,7 @@ class ShoppingCartsController:
         if cart is None:
             return make_response(jsonify({'message': 'Carrinho não encontrado'}), 404)
 
-        return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)
+        return make_response(jsonify(ResponseDto.show_complete_cart(cart)), 200)
 
     @staticmethod
     def add_coupon(cart_id, data):
@@ -163,6 +163,9 @@ class ShoppingCartsController:
             .filter(Coupon.code == data['code']).first()
         if coupon is None:
             return make_response(jsonify({'message': 'Cupom não encontrado'}), 404)
+
+        if not coupon.is_valid:
+            return make_response(jsonify({'message': 'Cupom inválido'}), 422)
 
         cart.coupon_id = coupon.id
         GlobalDB.instance().db.session.commit()
