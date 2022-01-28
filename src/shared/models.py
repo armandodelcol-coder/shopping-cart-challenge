@@ -40,6 +40,12 @@ class ShoppingCart(db.Model):
             )
         return items
 
+    def total(self):
+        total = decimal.Decimal(0)
+        for i in self.show_items():
+            total += i['subtotal']
+        return total
+
     def __repr__(self):
         return '<ShoppingCart %r>' % self.id
 

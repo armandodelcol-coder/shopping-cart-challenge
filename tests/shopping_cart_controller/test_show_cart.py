@@ -59,3 +59,46 @@ class TestShowCart(unittest.TestCase):
 
         assert response.status_code == 404
         assert data['message'] == 'Carrinho não encontrado'
+
+    def test_show_cart_with_correct_total_value(self):
+        # PREPARE TEMP DATA
+        tmp_cart = ShoppingCart(id=uuid.uuid4())
+        GlobalDB.instance().db.session.add(tmp_cart)
+        product_id = uuid.uuid4()
+        product2_id = uuid.uuid4()
+        tmp_product = Product(id=product_id, name="PRODUTO X", stock=5, price=17)
+        tmp_product2 = Product(id=product2_id, name="PRODUTO Y", stock=5, price=5.97)
+        GlobalDB.instance().db.session.add(tmp_product)
+        GlobalDB.instance().db.session.add(tmp_product2)
+        product_in_shopping_cart = ProductsInShoppingCart()
+        product_in_shopping_cart.product_id = tmp_product.id
+        product_in_shopping_cart.quantity = 2
+        tmp_cart.products.append(product_in_shopping_cart)
+        product_in_shopping_cart2 = ProductsInShoppingCart()
+        product_in_shopping_cart2.product_id = tmp_product2.id
+        product_in_shopping_cart2.quantity = 3
+        tmp_cart.products.append(product_in_shopping_cart2)
+        GlobalDB.instance().db.session.commit()
+
+        response = app.test_client().get(
+            f'/shoppingcarts/{tmp_cart.id}',
+            content_type='application/json',
+        )
+
+        data = json.loads(response.get_data(as_text=True))
+
+        assert response.status_code == 200
+        assert len(data['items']) == 2
+        assert data['id'] == tmp_cart.id
+        assert data['total'] == \
+               str(decimal.Decimal((2 * 17) + (3 * 5.97)).quantize(decimal.Decimal('0.01')))
+
+        # CLEAR TESTS DB
+        GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
+            .filter(ProductsInShoppingCart.shopping_cart_id == data['id']).delete()
+        GlobalDB.instance().db.session.delete(tmp_product)
+        GlobalDB.instance().db.session.delete(tmp_product2)
+        GlobalDB.instance().db.session.query(ShoppingCart) \
+            .filter(ShoppingCart.id == data['id']).delete()
+        GlobalDB.instance().db.session.commit()
+        GlobalDB.instance().db.session.close()

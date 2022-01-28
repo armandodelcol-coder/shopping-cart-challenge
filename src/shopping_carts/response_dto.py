@@ -11,5 +11,6 @@ class ResponseDto:
     def show_cart_with_items(cart: ShoppingCart):
         return {
             "id": cart.id,
-            "items": cart.show_items()
+            "items": cart.show_items(),
+            "total": cart.total()
         }
