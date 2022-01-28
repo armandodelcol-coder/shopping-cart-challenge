@@ -1,3 +1,4 @@
+import decimal
 import json
 import unittest
 import uuid
@@ -96,13 +97,15 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart()
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(name="PRODUTO X", stock=5, price=12.99)
+        product_id = uuid.uuid4()
+        product_name = "PRODUTO X"
+        tmp_product = Product(id=product_id, name=product_name, stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         GlobalDB.instance().db.session.commit()
 
         response = app.test_client().post(
             f'/shoppingcarts/{tmp_cart.id}',
-            data=json.dumps({'product_id': tmp_product.id, 'quantity': 1}),
+            data=json.dumps({'product_id': tmp_product.id, 'quantity': 2}),
             content_type='application/json',
         )
 
@@ -110,10 +113,11 @@ class TestShoppingCartController(unittest.TestCase):
 
         assert response.status_code == 200
         assert len(data['items']) > 0
-        assert data['items'][0]['product_id'] == data['items'][0]['product_id']
-        assert data['items'][0]['name'] == data['items'][0]['name']
-        assert data['items'][0]['quantity'] == 1
+        assert data['items'][0]['product_id'] == str(product_id)
+        assert data['items'][0]['name'] == product_name
+        assert data['items'][0]['quantity'] == 2
         assert data['items'][0]['price'] == '12.99'
+        assert data['items'][0]['subtotal'] == str(12.99 * 2)
 
         # CLEAR TESTS DB
         GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
@@ -213,7 +217,9 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=15)
+        product_id = uuid.uuid4()
+        product_name = "PRODUTO X"
+        tmp_product = Product(id=product_id, name=product_name, stock=5, price=15)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
@@ -231,9 +237,12 @@ class TestShoppingCartController(unittest.TestCase):
 
         assert response.status_code == 200
         assert len(data['items']) > 0
-        assert data['items'][0]['product_id'] == data['items'][0]['product_id']
-        assert data['items'][0]['name'] == data['items'][0]['name']
+        assert data['items'][0]['product_id'] == str(product_id)
+        assert data['items'][0]['name'] == product_name
         assert data['items'][0]['quantity'] == 2
+        assert data['items'][0]['price'] == '15.00'
+        assert data['items'][0]['subtotal'] == \
+               str(decimal.Decimal(2 * 15).quantize(decimal.Decimal('0.01')))
 
         # CLEAR TESTS DB
         GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
@@ -347,7 +356,9 @@ class TestShoppingCartController(unittest.TestCase):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=12.99)
+        product_id = uuid.uuid4()
+        product_name = "PRODUTO X"
+        tmp_product = Product(id=product_id, name=product_name, stock=5, price=12.99)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
@@ -365,9 +376,11 @@ class TestShoppingCartController(unittest.TestCase):
 
         assert response.status_code == 200
         assert len(data['items']) > 0
-        assert data['items'][0]['product_id'] == data['items'][0]['product_id']
-        assert data['items'][0]['name'] == data['items'][0]['name']
+        assert data['items'][0]['product_id'] == str(product_id)
+        assert data['items'][0]['name'] == product_name
         assert data['items'][0]['quantity'] == 3
+        assert data['items'][0]['price'] == '12.99'
+        assert data['items'][0]['subtotal'] == str(3 * 12.99)
 
         # CLEAR TESTS DB
         GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
@@ -500,27 +513,46 @@ class TestShoppingCartController(unittest.TestCase):
         GlobalDB.instance().db.session.commit()
         GlobalDB.instance().db.session.close()
 
-    def test_should_clear_cart(self):
+    def test_should_return_404_when_clear_not_exists_cart(self):
+        response = app.test_client().post(
+            f'/shoppingcarts/{str(uuid.uuid4())}/clear',
+            content_type='application/json',
+        )
+
+        data = json.loads(response.get_data(as_text=True))
+
+        assert response.status_code == 404
+        assert data['message'] == 'Carrinho não encontrado'
+
+    def test_show_cart_with_correct_values(self):
         # PREPARE TEMP DATA
         tmp_cart = ShoppingCart(id=uuid.uuid4())
         GlobalDB.instance().db.session.add(tmp_cart)
-        tmp_product = Product(id=uuid.uuid4(), name="PRODUTO X", stock=5, price=17)
+        product_id = uuid.uuid4()
+        tmp_product = Product(id=product_id, name="PRODUTO X", stock=5, price=17)
         GlobalDB.instance().db.session.add(tmp_product)
         product_in_shopping_cart = ProductsInShoppingCart()
         product_in_shopping_cart.product_id = tmp_product.id
-        product_in_shopping_cart.quantity = 1
+        product_in_shopping_cart.quantity = 2
         tmp_cart.products.append(product_in_shopping_cart)
         GlobalDB.instance().db.session.commit()
 
-        response = app.test_client().post(
-            f'/shoppingcarts/{tmp_cart.id}/clear',
+        response = app.test_client().get(
+            f'/shoppingcarts/{tmp_cart.id}',
             content_type='application/json',
         )
 
         data = json.loads(response.get_data(as_text=True))
 
         assert response.status_code == 200
-        assert len(data['items']) == 0
+        assert len(data['items']) == 1
+        assert data['id'] == tmp_cart.id
+        assert data['items'][0]['product_id'] == str(product_id)
+        assert data['items'][0]['name'] == 'PRODUTO X'
+        assert data['items'][0]['quantity'] == 2
+        assert data['items'][0]['price'] == '17.00'
+        assert data['items'][0]['subtotal'] == \
+               str(decimal.Decimal(2 * 17).quantize(decimal.Decimal('0.01')))
 
         # CLEAR TESTS DB
         GlobalDB.instance().db.session.query(ProductsInShoppingCart) \
@@ -530,3 +562,14 @@ class TestShoppingCartController(unittest.TestCase):
             .filter(ShoppingCart.id == data['id']).delete()
         GlobalDB.instance().db.session.commit()
         GlobalDB.instance().db.session.close()
+
+    def test_should_return_404_when_show_not_exists_cart(self):
+        response = app.test_client().get(
+            f'/shoppingcarts/{str(uuid.uuid4())}',
+            content_type='application/json',
+        )
+
+        data = json.loads(response.get_data(as_text=True))
+
+        assert response.status_code == 404
+        assert data['message'] == 'Carrinho não encontrado'

@@ -142,3 +142,12 @@ class ShoppingCartsController:
             .filter(ProductsInShoppingCart.shopping_cart_id == cart_id).delete()
         GlobalDB.instance().db.session.commit()
         return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)
+
+    @staticmethod
+    def show_cart(cart_id):
+        cart = GlobalDB.instance().db.session.query(ShoppingCart) \
+            .filter(ShoppingCart.id == cart_id).first()
+        if cart is None:
+            return make_response(jsonify({'message': 'Carrinho não encontrado'}), 404)
+
+        return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)

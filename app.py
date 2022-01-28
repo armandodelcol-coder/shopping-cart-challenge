@@ -53,3 +53,8 @@ def update_item_in_cart(cart_id):
 @app.route('/shoppingcarts/<cart_id>/clear', methods=['POST'])
 def clear_cart(cart_id):
     return ShoppingCartsController.clear_cart(cart_id)
+
+
+@app.route('/shoppingcarts/<cart_id>', methods=['GET'])
+def show_cart(cart_id):
+    return ShoppingCartsController.show_cart(cart_id)

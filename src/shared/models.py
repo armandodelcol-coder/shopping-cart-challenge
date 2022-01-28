@@ -1,3 +1,4 @@
+import decimal
 import uuid
 
 from flask_sqlalchemy import SQLAlchemy
@@ -31,7 +32,10 @@ class ShoppingCart(db.Model):
                     "product_id": p.product_id,
                     "name": product.name,
                     "quantity": p.quantity,
-                    "price": product.price
+                    "price": product.price,
+                    "subtotal": decimal.Decimal(
+                        product.price * decimal.Decimal(p.quantity)
+                    ).quantize(decimal.Decimal('0.01'))
                 }
             )
         return items
