@@ -55,7 +55,7 @@ engine.execute("insert into product values("
 
 engine.execute("create table coupon("
                "id bigint primary key auto_increment, "
-               "code varchar(80) not null, "
+               "code varchar(80) not null unique, "
                "discount_percentage decimal(10, 2) not null, "
                "is_valid tinyint(1) not null default 0)"
                " engine=InnoDB default charset=utf8mb4;")

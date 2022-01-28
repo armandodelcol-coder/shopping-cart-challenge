@@ -64,3 +64,9 @@ def show_cart(cart_id):
 @app.route('/coupons', methods=['GET'])
 def get_coupons():
     return CouponsController.get_coupons()
+
+
+@app.route('/shoppingcarts/<cart_id>/add-coupon', methods=['POST'])
+def add_coupon_in_cart(cart_id):
+    data = request.get_json()
+    return ShoppingCartsController.add_coupon(cart_id, data)

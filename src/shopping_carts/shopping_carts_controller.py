@@ -1,7 +1,7 @@
 from flask import make_response, jsonify
 
 from src.shared.global_db import GlobalDB
-from src.shared.models import Product, ShoppingCart, ProductsInShoppingCart
+from src.shared.models import Product, ShoppingCart, ProductsInShoppingCart, Coupon
 from src.shopping_carts.response_dto import ResponseDto
 
 
@@ -151,3 +151,20 @@ class ShoppingCartsController:
             return make_response(jsonify({'message': 'Carrinho não encontrado'}), 404)
 
         return make_response(jsonify(ResponseDto.show_cart_with_items(cart)), 200)
+
+    @staticmethod
+    def add_coupon(cart_id, data):
+        cart = GlobalDB.instance().db.session.query(ShoppingCart) \
+            .filter(ShoppingCart.id == cart_id).first()
+        if cart is None:
+            return make_response(jsonify({'message': 'Carrinho não encontrado'}), 404)
+
+        coupon = GlobalDB.instance().db.session.query(Coupon) \
+            .filter(Coupon.code == data['code']).first()
+        if coupon is None:
+            return make_response(jsonify({'message': 'Cupom não encontrado'}), 404)
+
+        cart.coupon_id = coupon.id
+        GlobalDB.instance().db.session.commit()
+
+        return make_response(jsonify({}), 200)
