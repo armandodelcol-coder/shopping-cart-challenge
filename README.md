@@ -78,6 +78,8 @@ Comando para rodar os testes com cobertura:
 *Disponibilizei uma collection do Postman com exemplos prontos para
 serem utilizados*
 
+arquivo: challenge-shopping-cart.postman_collection.json
+
 A api disponibiliza 10 endpoints:
 
 ### Listar produtos
