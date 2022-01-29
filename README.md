@@ -18,7 +18,7 @@ Esse projeto é uma API REST que simula funcionalidades de um carrinho de compra
 
 1. Clonar o projeto:
 
-    `git clone http...`
+    `git clone https://github.com/armandodelcol-coder/shopping-cart-challenge`
 
 
 2. Instalar as dependências:
@@ -52,7 +52,7 @@ Esse projeto é uma API REST que simula funcionalidades de um carrinho de compra
 
 1. Clonar o projeto:
 
-    `git clone http...`
+    `git clone https://github.com/armandodelcol-coder/shopping-cart-challenge`
 
 
 2. Rodar o projeto:
