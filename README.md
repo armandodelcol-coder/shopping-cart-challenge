@@ -59,7 +59,7 @@ Esse projeto é uma API REST que simula funcionalidades de um carrinho de compra
 
     Acesse com o terminal a pasta raiz do projeto e execute o comando:
 
-    `docker-compose run`
+    `docker-compose up`
 
     **Obs: as portas 3306 e 5000 devem estar livres**
 
